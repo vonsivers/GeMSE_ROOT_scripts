@@ -42,7 +42,7 @@ output
 simulated_efficiency
 ###################################################################
 analyzes the simulated efficiencies
-requires a paramters txt file (see "example_efficiency_simulation_parameters.txt")
+requires a paramters txt file (see "example_parameters_efficiency_simulation.txt")
 usage 
     ./simulated_efficiency <parameters_simulated_efficiency.txt>
 output
