@@ -82,7 +82,7 @@ int read_parameters(TString FileName) {
 // get efficiency for single line
 // --------------------------------
 
-double GetEfficiency(TString IsotopeName, double energy, double BR, double width_sig, double width_bck, int flag) {
+int GetEfficiency(double* Efficiency_times_BR, double* Efficiency_times_BR_err, TString IsotopeName, double energy, double BR, double width_sig, double width_bck, int flag) {
     
     TString FileName;
     
@@ -104,7 +104,7 @@ double GetEfficiency(TString IsotopeName, double energy, double BR, double width
     
     if (!dataFile) {
         std::cout << "##### ERROR: could not open " << FileName << std::endl;
-        return 0;
+        return 1;
     }
 
     
@@ -155,6 +155,10 @@ double GetEfficiency(TString IsotopeName, double energy, double BR, double width
     double counts_err = sqrt(sum_peak_err*sum_peak_err + f_bckleft*sum_bckleft_err*sum_bckleft_err + f_bckright*sum_bckright_err*sum_bckright_err);
     
     double efficiency = counts/NEvents;
+    double efficiency_err = counts_err/NEvents;
+    
+    *Efficiency_times_BR=efficiency*BR;
+    *Efficiency_times_BR_err=efficiency_err*BR;
     
     // draw histogram
     TCanvas* c1 = new TCanvas("c1");
@@ -205,7 +209,7 @@ double GetEfficiency(TString IsotopeName, double energy, double BR, double width
     if (!gSystem->OpenDirectory(Outputfolder)) {
         if (gSystem->MakeDirectory(Outputfolder)) {
             std::cout << "##### ERROR: could not create directory " << Outputfolder << std::endl;
-            return 0;
+            return 1;
         }
     }
     
@@ -218,7 +222,7 @@ double GetEfficiency(TString IsotopeName, double energy, double BR, double width
     
     dataFile->Close();
     
-    return efficiency*BR;
+    return 0;
     
 }
 
@@ -246,14 +250,14 @@ int main(int argc, char *argv[]) {
     const int npeaks = fIsotopeName.size();
 
     double efficiency[npeaks];
+    double efficiency_err[npeaks];
     
     double Efficiency_times_BR[npeaks];
+    double Efficiency_times_BR_err[npeaks];
     
     for (int i=0; i<npeaks; ++i) {
         
-        Efficiency_times_BR[i] = GetEfficiency(fIsotopeName[i], fEnergy[i], fBR[i], fWidth_sig[i], fWidth_bck[i], fFlag[i]);
-        
-        if (Efficiency_times_BR[i]==0) {
+        if (GetEfficiency(&Efficiency_times_BR[i], &Efficiency_times_BR_err[i], fIsotopeName[i], fEnergy[i], fBR[i], fWidth_sig[i], fWidth_bck[i], fFlag[i])) {
             return 1;
         }
 
@@ -271,9 +275,11 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i<npeaks; ++i) {
         
         efficiency[i]=Efficiency_times_BR[i]/fBR[i];
+        efficiency_err[i]=Efficiency_times_BR_err[i]/fBR[i];
         
         if (fIsotopeName[i]=="Tl208") {
             efficiency[i]=efficiency[i]*0.3594;
+            efficiency_err[i]=efficiency_err[i]*0.3594;
         }
         
         tenergy=fEnergy[i];
@@ -287,16 +293,18 @@ int main(int argc, char *argv[]) {
     file->Close();
     
     // draw graph
-    TGraph* graph = new TGraph(npeaks, &fEnergy.at(0), efficiency);
+    TGraphErrors* graph = new TGraphErrors(npeaks, &fEnergy.at(0), efficiency, 0, efficiency_err);
     graph->SetName("graph_efficiency");
     
     TCanvas* c2 = new TCanvas("c2");
     graph->SetMarkerStyle(20);
+    graph->SetMarkerSize(0.8);
     graph->SetMarkerColor(1);
     graph->SetLineColor(1);
     graph->SetTitle("Simulated Efficiency");
     graph->GetXaxis()->SetTitle("Energy (keV)");
     graph->GetYaxis()->SetTitle("Detection Efficiency");
+    graph->GetYaxis()->SetTitleOffset(1.5);
     graph->Draw("ap");
     
     c2->SaveAs(fInputFolder+"/energy_vs_efficiency.pdf");

@@ -31,7 +31,7 @@ LIBS := `bat-config --libs`
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-        energy_resolution.cxx
+        simulated_efficiency.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
@@ -39,12 +39,12 @@ CXXSRCS      = \
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
 MYPROGS     = \
-        energy_resolution
+        simulated_efficiency
 
 GARBAGE = $(CXXOBJS) *~ link.d $(MYPROGS)
 
 # targets
-all : energy_resolution
+all : simulated_efficiency
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -57,7 +57,7 @@ link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 clean :
 	rm -f $(GARBAGE)
 
-energy_resolution : $(CXXOBJS)
+simulated_efficiency : $(CXXOBJS)
 	$(CXX) $(LDFLAGS) $(CXXOBJS) $(LIBS) -o $@
 
 print :
