@@ -94,9 +94,6 @@ int main(int argc, char *argv[]) {
     TCanvas* c1 = new TCanvas("c1");
     hist->Draw();
     
-    // set start parameters for fit
-    double amp_st, mean_st, sigma_st, const_st, slope_st;
-    
     TF1* fit = new TF1();
     std::vector<double> peakpos, peakpos_err, sigma, sigma_err;
     
@@ -105,14 +102,13 @@ int main(int argc, char *argv[]) {
     // loop over all peaks
     for (int i=0; i<npeaks; ++i) {
         
-        amp_st = famp_st[i];
-        mean_st = fmean_st[i];
-        sigma_st = fsigma_st[i];
-        const_st = fconst_st[i];
-        slope_st = fslope_st[i];
-        
         // fit peak with Gauss+Pol1
-        fit = FitGaussPol1(hist, amp_st, mean_st, sigma_st, const_st, slope_st, ffitrange_low[i], ffitrange_high[i]);
+        std::cout << "###################################################" << std::endl;
+        std::cout << "Fitting line " << i+1 << " in range " << ffitrange_low[i] << " - " << ffitrange_high[i] << std::endl;
+        fit = FitGaussPol1(hist,famp_st[i],fmean_st[i], fsigma_st[i], fconst_st[i], fslope_st[i], ffitrange_low[i], ffitrange_high[i]);
+        if (fit==0) {
+            return 1;
+        }
         peakpos.push_back(fit->GetParameter(1));
         peakpos_err.push_back(fit->GetParError(1));
         sigma.push_back(fit->GetParameter(2));
@@ -128,7 +124,12 @@ int main(int argc, char *argv[]) {
     TGraphErrors* graph = new TGraphErrors(npeaks, &peakpos.at(0), &sigma.at(0), &peakpos_err.at(0), &sigma_err.at(0) );
     
     // fit with sqrt
-    FitSqrt(graph,0.1,0.,0.);
+    std::cout << "###################################################" << std::endl;
+    std::cout << "Fitting resolution curve ..." << std::endl;
+    TF1* fit_res = FitSqrt(graph,0.1,0.,0.);
+    if (fit_res==0) {
+        return 1;
+    }
     
     TCanvas* c2 = new TCanvas("c2");
     graph->SetTitle("Energy Resolution");

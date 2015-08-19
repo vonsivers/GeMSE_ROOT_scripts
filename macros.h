@@ -9,6 +9,7 @@
 #include <TROOT.h>
 #include <TVectorD.h>
 #include <TPaveStats.h>
+#include <TMinuit.h>
 
 #include <iostream>
 #include <fstream>
@@ -192,6 +193,13 @@ TF1* FitGauss(TH1D* hist, double amp_st, double mean_st, double sigma_st, double
     
     fitFunction->DrawCopy("LSAME");
     
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
+    
     
     return fitFunction;
     
@@ -232,6 +240,12 @@ TF1* FitGaussPol1(TH1D* hist, double amp_st, double mean_st, double sigma_st, do
     
     fitFunction->DrawCopy("LSAME");
     
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
     
     return fitFunction;
 
@@ -277,6 +291,13 @@ TF1* Fit2Peak(TH1D* hist, double amp1_st, double mean1_st, double sigma1_st, dou
     
     fitFunction->DrawCopy("LSAME");
     
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
+    
     return fitFunction;
     
 }
@@ -298,6 +319,13 @@ TF1* FitPol1(TH1D* hist, double a_st, double b_st, double range_min, double rang
     
     fitFunction->DrawCopy("LSAME");
     
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
+    
     return fitFunction;
 }
 
@@ -314,6 +342,13 @@ TF1* FitPol2(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     graph->Fit(fitFunction,"EMF");
     
     gStyle->SetOptFit(1);
+    
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
     
     return fitFunction;
 }
@@ -332,6 +367,13 @@ TF1* FitSqrt(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     graph->Fit(fitFunction,"EMF");
     
     gStyle->SetOptFit(1);
+    
+    TString status=gMinuit->fCstatu.Data();
+    
+    if (status!="SUCCESSFUL") {
+        std::cout << "###### ERROR: Fit not successful! Try different start parameters!" << std::endl;
+        return 0;
+    }
     
     return fitFunction;
 }

@@ -95,9 +95,6 @@ int main(int argc, char *argv[]) {
     TCanvas* c1 = new TCanvas("c1");
     hist->Draw();
     
-    // set start parameters for fit
-    double amp_st, mean_st, sigma_st, const_st, slope_st;
-    
     TF1* fit = new TF1();
     std::vector<double> peakpos;
     std::vector<double> peakpos_err;
@@ -107,14 +104,13 @@ int main(int argc, char *argv[]) {
     // loop over all peaks
     for (int i=0; i<npeaks; ++i) {
         
-        amp_st = famp_st[i];
-        mean_st = fmean_st[i];
-        sigma_st = fsigma_st[i];
-        const_st = fconst_st[i];
-        slope_st = fslope_st[i];
-        
-        // fit peak with Gauss
-        fit = FitGaussPol1(hist,amp_st,mean_st, sigma_st, const_st, slope_st, ffitrange_low[i], ffitrange_high[i]);
+        // fit peak with Gauss+Pol1
+        std::cout << "###################################################" << std::endl;
+        std::cout << "Fitting line " << i+1 << " in range " << ffitrange_low[i] << " - " << ffitrange_high[i] << std::endl;
+        fit = FitGaussPol1(hist,famp_st[i],fmean_st[i], fsigma_st[i], fconst_st[i], fslope_st[i], ffitrange_low[i], ffitrange_high[i]);
+        if (fit==0) {
+            return 1;
+        }
         peakpos.push_back(fit->GetParameter(1));
         peakpos_err.push_back(fit->GetParError(1));
 
@@ -128,7 +124,12 @@ int main(int argc, char *argv[]) {
     TGraphErrors* graph = new TGraphErrors(npeaks, &peakpos.at(0), &fenergy.at(0), &peakpos_err.at(0), 0 );
     
     // fit with pol2
-    FitPol2(graph,0.,1.,0.);
+    std::cout << "###################################################" << std::endl;
+    std::cout << "Fitting calibration curve ..." << std::endl;
+    TF1* fit_calib = FitPol2(graph,0.,1.,0.);
+    if (fit_calib==0) {
+        return 1;
+    }
     
     TCanvas* c2 = new TCanvas("c2");
     graph->SetTitle("Energy Calibration");
