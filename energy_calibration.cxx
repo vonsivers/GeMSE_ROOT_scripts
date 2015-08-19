@@ -7,6 +7,8 @@ std::vector<double> fenergy;
 std::vector<double> famp_st;
 std::vector<double> fmean_st;
 std::vector<double> fsigma_st;
+std::vector<double> fconst_st;
+std::vector<double> fslope_st;
 
 // ----------------------------------------------------
 // read parameters from user specified file
@@ -14,7 +16,7 @@ std::vector<double> fsigma_st;
 
 int read_parameters(TString FileName) {
     
-    double energy, fitrange_low, fitrange_high, amp_st, mean_st, sigma_st;
+    double energy, fitrange_low, fitrange_high, amp_st, mean_st, sigma_st, const_st, slope_st;
     
     ifstream File;
     File.open(FileName);
@@ -32,12 +34,14 @@ int read_parameters(TString FileName) {
     getline(File, headerline);
     while (true)
     {
-        File >> fitrange_low >> fitrange_high >> amp_st >> mean_st >> sigma_st >> energy;
+        File >> fitrange_low >> fitrange_high >> amp_st >> mean_st >> sigma_st >> const_st >> slope_st >> energy;
         ffitrange_low.push_back(fitrange_low);
         ffitrange_high.push_back(fitrange_high);
         famp_st.push_back(amp_st);
         fmean_st.push_back(mean_st);
         fsigma_st.push_back(sigma_st);
+        fconst_st.push_back(const_st);
+        fslope_st.push_back(slope_st);
         fenergy.push_back(energy);
         if( File.eof() ) break;
         
@@ -49,10 +53,10 @@ int read_parameters(TString FileName) {
     std::cout << "######################################" << std::endl;
     std::cout << "#### Reading "<< FileName << " ..." << std::endl;
     std::cout << "spectrum file name: " << fFileName_spectrum << std::endl;
-    std::cout << "fitrange low \t fitrange high \t energy" << std::endl;
+    std::cout << "fitrange low \t fitrange high \t counts \t mean \t sigma  \t const. \t slope \t energy" << std::endl;
     for (int i=0; i<fenergy.size(); ++i)
     {
-        std::cout << ffitrange_low[i] << "\t" << ffitrange_high[i] << "\t" << fenergy[i] << std::endl;
+        std::cout << ffitrange_low[i] << "\t" << ffitrange_high[i] << "\t" << famp_st[i] << "\t" << fmean_st[i] << "\t" << fsigma_st[i]<< "\t"  << fconst_st[i]<< "\t"  << fslope_st[i]<< "\t" << fenergy[i] << std::endl;
     }
     std::cout << "######################################" << std::endl;
     
@@ -92,7 +96,7 @@ int main(int argc, char *argv[]) {
     hist->Draw();
     
     // set start parameters for fit
-    double amp_st, mean_st, sigma_st;
+    double amp_st, mean_st, sigma_st, const_st, slope_st;
     
     TF1* fit = new TF1();
     std::vector<double> peakpos;
@@ -106,9 +110,11 @@ int main(int argc, char *argv[]) {
         amp_st = famp_st[i];
         mean_st = fmean_st[i];
         sigma_st = fsigma_st[i];
+        const_st = fconst_st[i];
+        slope_st = fslope_st[i];
         
         // fit peak with Gauss
-        fit = FitGauss(hist,amp_st,mean_st, sigma_st, ffitrange_low[i], ffitrange_high[i]);
+        fit = FitGaussPol1(hist,amp_st,mean_st, sigma_st, const_st, slope_st, ffitrange_low[i], ffitrange_high[i]);
         peakpos.push_back(fit->GetParameter(1));
         peakpos_err.push_back(fit->GetParError(1));
 
