@@ -163,7 +163,7 @@ TF1* getcalibration(TString FileName) {
 }
 
 // fit peak only
-TF1* FitGauss(TH1D* hist,double amp_st, double mean_st, double sigma_st, double range_min, double range_max) {
+TF1* FitGauss(TH1D* hist, double amp_st, double mean_st, double sigma_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
     
@@ -198,7 +198,7 @@ TF1* FitGauss(TH1D* hist,double amp_st, double mean_st, double sigma_st, double 
 }
 
 // fit peak + background
-TF1* FitPeak(TH1D* hist,double amp_st, double mean_st, double sigma_st, double const_st, double slope_st, double range_min, double range_max) {
+TF1* FitGaussPol1(TH1D* hist, double amp_st, double mean_st, double sigma_st, double const_st, double slope_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
     
@@ -221,8 +221,7 @@ TF1* FitPeak(TH1D* hist,double amp_st, double mean_st, double sigma_st, double c
     fitFunction->SetParameter(1,mean_st);
     fitFunction->SetParameter(2,sigma_st);
     fitFunction->SetParameter(3,const_st);
-    
-    //fitFunction->SetParameter(4,slope_st);
+    fitFunction->SetParameter(4,slope_st);
     
     //fitFunction->SetParLimits(0,0.,1000.*amp_st);
     //fitFunction->SetParLimits(1,range_min,range_max);
@@ -239,7 +238,7 @@ TF1* FitPeak(TH1D* hist,double amp_st, double mean_st, double sigma_st, double c
 }
 
 // fit 2 peaks + background
-TF1* Fit2Peak(TH1D* hist,double amp1_st, double mean1_st, double sigma1_st, double amp2_st, double mean2_st, double sigma2_st, double const_st, double slope_st, double range_min, double range_max) {
+TF1* Fit2Peak(TH1D* hist, double amp1_st, double mean1_st, double sigma1_st, double amp2_st, double mean2_st, double sigma2_st, double const_st, double slope_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
     
@@ -283,7 +282,7 @@ TF1* Fit2Peak(TH1D* hist,double amp1_st, double mean1_st, double sigma1_st, doub
 }
 
 // fit background only
-TF1* FitPol1(TH1D* hist,double a_st, double b_st, double range_min, double range_max) {
+TF1* FitPol1(TH1D* hist, double a_st, double b_st, double range_min, double range_max) {
     
     TF1* fitFunction = new TF1("fitFunction", "pol1");
     
@@ -303,7 +302,7 @@ TF1* FitPol1(TH1D* hist,double a_st, double b_st, double range_min, double range
 }
 
 // fit energy calibration
-TF1* FitPol2(TGraphErrors* graph,double a_st, double b_st, double c_st) {
+TF1* FitPol2(TGraphErrors* graph, double a_st, double b_st, double c_st) {
 
     TF1* fitFunction = new TF1("fitFunction", "pol2");
     
@@ -321,7 +320,7 @@ TF1* FitPol2(TGraphErrors* graph,double a_st, double b_st, double c_st) {
 
 
 // fit resolution
-TF1* FitSqrt(TGraphErrors* graph,double a_st, double b_st, double c_st) {
+TF1* FitSqrt(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     
     TF1* fitFunction = new TF1("fitFunction", "sqrt([0]+[1]*x+[2]*x*x)");
     
