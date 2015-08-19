@@ -272,6 +272,10 @@ int main(int argc, char *argv[]) {
         
         efficiency[i]=Efficiency_times_BR[i]/fBR[i];
         
+        if (fIsotopeName[i]=="Tl208") {
+            efficiency[i]=efficiency[i]*0.3594;
+        }
+        
         tenergy=fEnergy[i];
         teff_BR=Efficiency_times_BR[i];
                 
