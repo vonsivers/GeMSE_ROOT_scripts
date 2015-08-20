@@ -3,12 +3,12 @@
 TString fFileName_spectrum;
 std::vector<double> ffitrange_low;
 std::vector<double> ffitrange_high;
-std::vector<double> fenergy;
 std::vector<double> famp_st;
 std::vector<double> fmean_st;
 std::vector<double> fsigma_st;
 std::vector<double> fconst_st;
 std::vector<double> fslope_st;
+
 
 // ----------------------------------------------------
 // read parameters from user specified file
@@ -16,7 +16,7 @@ std::vector<double> fslope_st;
 
 int read_parameters(TString FileName) {
     
-    double energy, fitrange_low, fitrange_high, amp_st, mean_st, sigma_st, const_st, slope_st;
+    double fitrange_low, fitrange_high, amp_st, mean_st, sigma_st, const_st, slope_st;
     
     ifstream File;
     File.open(FileName);
@@ -34,7 +34,7 @@ int read_parameters(TString FileName) {
     getline(File, headerline);
     while (true)
     {
-        File >> fitrange_low >> fitrange_high >> amp_st >> mean_st >> sigma_st >> const_st >> slope_st >> energy;
+        File >> fitrange_low >> fitrange_high >> amp_st >> mean_st >> sigma_st >> const_st >> slope_st;
         ffitrange_low.push_back(fitrange_low);
         ffitrange_high.push_back(fitrange_high);
         famp_st.push_back(amp_st);
@@ -42,7 +42,6 @@ int read_parameters(TString FileName) {
         fsigma_st.push_back(sigma_st);
         fconst_st.push_back(const_st);
         fslope_st.push_back(slope_st);
-        fenergy.push_back(energy);
         if( File.eof() ) break;
         
     }
@@ -53,10 +52,10 @@ int read_parameters(TString FileName) {
     std::cout << "######################################" << std::endl;
     std::cout << "#### Reading "<< FileName << " ..." << std::endl;
     std::cout << "spectrum file name: " << fFileName_spectrum << std::endl;
-    std::cout << "fitrange low \t fitrange high \t counts \t mean \t sigma  \t const. \t slope \t energy" << std::endl;
-    for (int i=0; i<fenergy.size(); ++i)
+    std::cout << "fitrange low \t fitrange high \t counts \t mean \t sigma \t const. \t slope" << std::endl;
+    for (int i=0; i<ffitrange_low.size(); ++i)
     {
-        std::cout << ffitrange_low[i] << "\t" << ffitrange_high[i] << "\t" << famp_st[i] << "\t" << fmean_st[i] << "\t" << fsigma_st[i]<< "\t"  << fconst_st[i]<< "\t"  << fslope_st[i]<< "\t" << fenergy[i] << std::endl;
+        std::cout << ffitrange_low[i] << "\t" << ffitrange_high[i] << "\t" << famp_st[i] << "\t" << fmean_st[i] << "\t" << fsigma_st[i]<< "\t"  << fconst_st[i]<< "\t"  << fslope_st[i]<< "\t"  << std::endl;
     }
     std::cout << "######################################" << std::endl;
     
@@ -64,7 +63,7 @@ int read_parameters(TString FileName) {
 }
 
 // ----------------------------------------------------
-// make energy calibration
+// determine resolution
 // ----------------------------------------------------
 
 int main(int argc, char *argv[]) {
@@ -96,10 +95,9 @@ int main(int argc, char *argv[]) {
     hist->Draw();
     
     TF1* fit = new TF1();
-    std::vector<double> peakpos;
-    std::vector<double> peakpos_err;
+    std::vector<double> peakpos, peakpos_err, sigma, sigma_err;
     
-    int npeaks = fenergy.size();
+    int npeaks = ffitrange_low.size();
 
     // loop over all peaks
     for (int i=0; i<npeaks; ++i) {
@@ -113,33 +111,35 @@ int main(int argc, char *argv[]) {
         }
         peakpos.push_back(fit->GetParameter(1));
         peakpos_err.push_back(fit->GetParError(1));
+        sigma.push_back(fit->GetParameter(2));
+        sigma_err.push_back(fit->GetParError(2));
 
     }
     
     // save calibration fits
-    c1->SaveAs(fFileName_spectrum+"_calibration_fits.root");
-    c1->SaveAs(fFileName_spectrum+"_calibration_fits.pdf");
+    c1->SaveAs(fFileName_spectrum+"_resolution_fits.root");
+    c1->SaveAs(fFileName_spectrum+"_resolution_fits.pdf");
     
     // plot peak position vs. energy
-    TGraphErrors* graph = new TGraphErrors(npeaks, &peakpos.at(0), &fenergy.at(0), &peakpos_err.at(0), 0 );
+    TGraphErrors* graph = new TGraphErrors(npeaks, &peakpos.at(0), &sigma.at(0), &peakpos_err.at(0), &sigma_err.at(0) );
     
-    // fit with pol2
+    // fit with sqrt
     std::cout << "###################################################" << std::endl;
-    std::cout << "Fitting calibration curve ..." << std::endl;
-    TF1* fit_calib = FitPol2(graph,0.,1.,0.);
-    if (fit_calib==0) {
+    std::cout << "Fitting resolution curve ..." << std::endl;
+    TF1* fit_res = FitSqrt(graph,0.1,0.,0.);
+    if (fit_res==0) {
         return 1;
     }
     
     TCanvas* c2 = new TCanvas("c2");
-    graph->SetTitle("Energy Calibration");
+    graph->SetTitle("Energy Resolution");
     graph->SetMarkerStyle(2);
-    graph->GetXaxis()->SetTitle("ADC Channel");
-    graph->GetYaxis()->SetTitle("Energy (keV)");
+    graph->GetXaxis()->SetTitle("Energy (keV)");
+    graph->GetYaxis()->SetTitle("Sigma (keV)");
     graph->Draw("ap");
     
-    c2->SaveAs(fFileName_spectrum+"_calibration_function.root");
-    c2->SaveAs(fFileName_spectrum+"_calibration_function.pdf");
+    c2->SaveAs(fFileName_spectrum+"_resolution_function.root");
+    c2->SaveAs(fFileName_spectrum+"_resolution_function.pdf");
     
     return 0;
 }
