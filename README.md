@@ -6,7 +6,7 @@ Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI fil
 ./make_rootfile <spectrum_file.txt>
 ```
 ## Output
-* **spectrum_file.txt.root** 
+* spectrum_file.txt.root 
     * TH1D "hist": spectrum
     * TVectorD "t_live": live time
     * TVectorD "t_real": real time
@@ -17,7 +17,7 @@ energy_calibration
 Fits the peaks in a spectrum with a Gauss+Pol1. The peak position is then fitted with a Pol2 to get the energy calibration. 
 
 Requires a **parameters txt file** (see „example_parameters_calibration.txt“) with the following content:
-* spectrum file name: name of spectrum **ROOT* file
+* spectrum file name: name of spectrum **ROOT** file
 
 For every peak
 * fitrange low (ADC channels): lower limit of fit range
@@ -33,14 +33,14 @@ For every peak
 ./energy_calibration <parameters_calibration.txt>
 ```
 ## Output	
-* **spectrum_file.txt.root_calibration_fits.root** 
+* spectrum_file.txt.root_calibration_fits.root
     * TCanvas "c1"
-        * TH1D "hist": original spectrum 
+        * TH1D "hist": original (uncalibrated) spectrum 
         * TF1 "fitFunction": fit for every peak
-* **spectrum_file.txt.root_calibration_function.root** 
+* spectrum_file.txt.root_calibration_function.root
     * TCanvas "c2" 
         * TGraphErrors "Graph": peak position vs energy 
-        * TF1 "fitFunction": Pol2 fit to the data
+        * TF1 "fitFunction": Pol2 fit to "Graph"
 
 
 calibrate_spectrum
@@ -51,7 +51,7 @@ calibrates a **spectrum txt file** with a calibration function
 ./calibrate_spectrum <spectrum_file.txt> <calibration_function.root>
 ```
 ## Output
-* **spectrum_file.txt_calibrated.root**
+* spectrum_file.txt_calibrated.root
     * TH1D "hist": calibrated spectrum 
     * TVectorD "t_live": live time 
     * TVectorD "t_real": real time
@@ -105,8 +105,15 @@ For every peak
 ./energy_resolution <parameters_resolution.txt>
 ```
 ## Output	
-* <spectrum_file.txt.root_resolution_fits.root>: contains the original spectrum with all fits to the peaks
-* <spectrum_file.txt.root_resolution_function.root>: contains a TGraphErrors with the standard deviation vs energy and the fit function to the data
+* spectrum_file.txt.root_resolution_fits.root
+    * TCanvas "c1"
+        * TH1D "hist": calibrated spectrum 
+        * TF1 "fitFunction": fit for every peak
+* spectrum_file.txt.root_resolution_function.root
+    * TCanvas "c2" 
+        * TGraphErrors "Graph": resolution vs energy 
+        * TF1 "fitFunction": fit to "Graph" with sqrt(p0+p1*x+p2*x^2)
+
 
 
 macros.h
