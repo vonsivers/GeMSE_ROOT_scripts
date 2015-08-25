@@ -35,7 +35,7 @@ calibrates a spectrum txt file with a calibration function
 ./calibrate_spectrum <spectrum_file.txt> <calibration_function.root>
 ```
 ## Output
-* <spectrum_file.txt_calibrated.root>: contains the calibrated spectrum as a TH1D and the live time and real time both as TVectorD
+* **spectrum_file.txt_calibrated.root**: contains the calibrated spectrum as a TH1D named "hist" and the live time and real time both as TVectorD named t_live and t_real
 
 
 simulated_efficiency
