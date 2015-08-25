@@ -1,30 +1,31 @@
 make_rootfile
 ======
-converts an ASCI spectrum of CAEN DT5781A to a ROOT file
-first line in ASCI file must be real time, second line live time
+Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI file must be real time, second line live time
 ## Usage
 ```
 ./make_rootfile <spectrum_file.txt>
 ```
 ## Output
-* <spectrum_file.txt.root>: contains the spectrum as a TH1D and the live time and real time both as TVectorD
+* **spectrum_file.txt.root**: contains the spectrum as a TH1D named "hist" and the live time and real time both as TVectorD named "t_live" and "t_real"
 
 
 energy_calibration
 ======
-fits the peaks in a spectrum with Gauss+Pol1
-the peak position is then fitted with a second order polynomial to get the energy calibration
-requires a **parameters txt file** (see „example_parameters_calibration.txt“) with the following content:
+Fits the peaks in a spectrum with Gauss+Pol1. The peak position is then fitted with a second order polynomial to get the energy calibration. Requires a **parameters txt file** (see „example_parameters_calibration.txt“) with the following content:
 * name of spectrum root file
 also for every peak
 * fit range, fit start parameters (amplitude, mean, sigma), literature value of peak energy
+
 ## Usage
 ```
 ./energy_calibration <parameters_calibration.txt>
 ```
 ## Output	
-* <spectrum_file.txt.root_calibration_fits.root>: contains the original spectrum with all fits to the peaks
-* <spectrum_file.txt.root_calibration_function.root>: contains a TGraphErrors with the peak position vs energy and the polynomial fit function to the data
+* **spectrum_file.txt.root_calibration_fits.root**: contains the original spectrum with all fits to the peaks
+* **spectrum_file.txt.root_calibration_function.root** 
+    * TCanvas "c2" 
+        * TGraphErrors "Graph": peak position vs energy 
+        * TF1 "fitFunction": Pol2 fit to the data
 
 
 calibrate_spectrum
@@ -35,7 +36,7 @@ calibrates a spectrum txt file with a calibration function
 ./calibrate_spectrum <spectrum_file.txt> <calibration_function.root>
 ```
 ## Output
-* **spectrum_file.txt_calibrated.root**: contains the calibrated spectrum as a TH1D named "hist" and the live time and real time both as TVectorD named t_live and t_real
+* **spectrum_file.txt_calibrated.root**: contains the calibrated spectrum as a TH1D named "hist" and the live time and real time both as TVectorD named "t_live" and "t_real"
 
 
 simulated_efficiency
