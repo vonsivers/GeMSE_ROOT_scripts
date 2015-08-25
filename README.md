@@ -13,6 +13,7 @@ energy_calibration
 ======
 Fits the peaks in a spectrum with Gauss+Pol1. The peak position is then fitted with a second order polynomial to get the energy calibration. Requires a **parameters txt file** (see „example_parameters_calibration.txt“) with the following content:
 * name of spectrum root file
+
 also for every peak
 * fit range, fit start parameters (amplitude, mean, sigma), literature value of peak energy
 
@@ -21,7 +22,10 @@ also for every peak
 ./energy_calibration <parameters_calibration.txt>
 ```
 ## Output	
-* **spectrum_file.txt.root_calibration_fits.root**: contains the original spectrum with all fits to the peaks
+* **spectrum_file.txt.root_calibration_fits.root** 
+    * TCanvas "c1"
+        * TH1D "hist": original spectrum 
+        * TF1 "fitFunction": fit for every peak
 * **spectrum_file.txt.root_calibration_function.root** 
     * TCanvas "c2" 
         * TGraphErrors "Graph": peak position vs energy 
