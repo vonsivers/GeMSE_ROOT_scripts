@@ -1,7 +1,6 @@
 # spectrum file name
 /Users/sivers/Desktop/Ge_detector_Bern/test_measurements/Tieflabor/calibration_resolution/caen_mca/DT5770/Co60_25cm_test03.txt.root
-# fitrange low (ADC channels)	fitrange high (ADC channels)	counts	mean (ADC channels)	sigma (ADC channels)	constant (ADC channels)	slope	energy (keV)
-
+# fitrange low (ADC channels)	fitrange high (ADC channels)	counts	mean (ADC channels)	sigma (ADC channels)	constant	slope	energy (keV)
 1850	1950	5000	1901	2	100	0	351.9
 3250	3350	5000	3301	5	100	0	609.3
 4880	5000	5000	4941	5	100	0	911.1
