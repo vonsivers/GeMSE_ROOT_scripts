@@ -64,7 +64,7 @@ Analyzes the efficiencies simulated with the Geant4 code "GeMSE_efficiency_simul
 Requires a **paramters txt file** (see "example_parameters_efficiency_simulation.txt") with the following content:
 * input folder: folder with the output files of the Geant4 simulation
 
-For every isotope
+For every gamma line
 * isotope name: name of the isotope, has to correspond to the simulation filename 
 * energy (keV): energy of the peak 
 * branching ratio: emission probability of the gammas 
