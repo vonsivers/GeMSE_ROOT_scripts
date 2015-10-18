@@ -64,10 +64,11 @@ Analyzes the efficiencies simulated with the Geant4 code "GeMSE_efficiency_simul
 Requires a **paramters txt file** (see "example_parameters_efficiency_simulation.txt") with the following content:
 * input folder: folder with the output files of the Geant4 simulation
 
-For every isotope
+For every gamma line
 * isotope name: name of the isotope, has to correspond to the simulation filename 
 * energy (keV): energy of the peak 
-* branching ratio: emission probability of the gammas 
+* G4 BR: emission probability of the gammas in Geant4. When gammas are directly simulated instead of full decay put 1.
+* NuDat BR: emission probability of the gammas taken from NuDat (http://www.nndc.bnl.gov/nudat2/chartNuc.jsp)
 * width signal region (keV): width of region to sum up signal counts
 * width bkg region (keV): width of region to sum up bkg counts
 * flag: 1 when the gamma line is directly simulated. 0 if full decay is simulated
