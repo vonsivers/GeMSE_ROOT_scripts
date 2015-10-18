@@ -18,7 +18,7 @@
 
 TString fInputFolder;
 std::vector<TString> fIsotopeName;
-std::vector<double> fEnergy, fWidth_sig, fWidth_bck, fBR;
+std::vector<double> fEnergy, fWidth_sig, fWidth_bck, fBR_G4, fBR_NuDat;
 std::vector<int> fFlag;
 
 
@@ -29,7 +29,7 @@ std::vector<int> fFlag;
 int read_parameters(TString FileName) {
     
     TString IsotopeName;
-    double energy, BR, width_sig, width_bck;
+    double energy, BR_G4, BR_NuDat, width_sig, width_bck;
     int flag;
     
     ifstream File;
@@ -48,10 +48,11 @@ int read_parameters(TString FileName) {
     getline(File, headerline);
     while (true)
     {
-        File >> IsotopeName >> energy >> BR >> width_sig >> width_bck >> flag;
+        File >> IsotopeName >> energy >> BR_G4 >> BR_NuDat >> width_sig >> width_bck >> flag;
         fIsotopeName.push_back(IsotopeName);
         fEnergy.push_back(energy);
-        fBR.push_back(BR);
+        fBR_G4.push_back(BR_G4);
+        fBR_NuDat.push_back(BR_NuDat);
         fWidth_sig.push_back(width_sig);
         fWidth_bck.push_back(width_bck);
         fFlag.push_back(flag);
@@ -82,7 +83,7 @@ int read_parameters(TString FileName) {
 // get efficiency for single line
 // --------------------------------
 
-int GetEfficiency(double* Efficiency_times_BR, double* Efficiency_times_BR_err, TString IsotopeName, double energy, double BR, double width_sig, double width_bck, int flag) {
+int GetEfficiency(double* Efficiency_times_BR, double* Efficiency_times_BR_err, TString IsotopeName, double energy, double BR_ratio, double width_sig, double width_bck, int flag) {
     
     TString FileName;
     
@@ -94,7 +95,6 @@ int GetEfficiency(double* Efficiency_times_BR, double* Efficiency_times_BR_err, 
     }
     else {
         FileName = fInputFolder +"/simulation_"+IsotopeName+".root";
-        BR=1;
     }
     
     
@@ -157,8 +157,8 @@ int GetEfficiency(double* Efficiency_times_BR, double* Efficiency_times_BR_err, 
     double efficiency = counts/NEvents;
     double efficiency_err = counts_err/NEvents;
     
-    *Efficiency_times_BR=efficiency*BR;
-    *Efficiency_times_BR_err=efficiency_err*BR;
+    *Efficiency_times_BR=efficiency*BR_ratio;
+    *Efficiency_times_BR_err=efficiency_err*BR_ratio;
     
     // draw histogram
     TCanvas* c1 = new TCanvas("c1");
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
     
     for (int i=0; i<npeaks; ++i) {
         
-        if (GetEfficiency(&Efficiency_times_BR[i], &Efficiency_times_BR_err[i], fIsotopeName[i], fEnergy[i], fBR[i], fWidth_sig[i], fWidth_bck[i], fFlag[i])) {
+        if (GetEfficiency(&Efficiency_times_BR[i], &Efficiency_times_BR_err[i], fIsotopeName[i], fEnergy[i], fBR_NuDat[i]/fBR_G4[i], fWidth_sig[i], fWidth_bck[i], fFlag[i])) {
             return 1;
         }
 
@@ -274,13 +274,8 @@ int main(int argc, char *argv[]) {
     
     for (int i = 0; i<npeaks; ++i) {
         
-        efficiency[i]=Efficiency_times_BR[i]/fBR[i];
-        efficiency_err[i]=Efficiency_times_BR_err[i]/fBR[i];
-        
-        if (fIsotopeName[i]=="Tl208") {
-            efficiency[i]=efficiency[i]*0.3594;
-            efficiency_err[i]=efficiency_err[i]*0.3594;
-        }
+        efficiency[i]=Efficiency_times_BR[i]/fBR_NuDat[i];
+        efficiency_err[i]=Efficiency_times_BR_err[i]/fBR_NuDat[i];
         
         tenergy=fEnergy[i];
         teff_BR=Efficiency_times_BR[i];
