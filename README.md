@@ -1,4 +1,4 @@
-make_rootfile
+make_rootfile_spectrum
 ======
 Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI file must be real time, second line live time
 ## Usage
@@ -139,10 +139,14 @@ Produces a spectrum from a list file
 ## Usage
 ```
 ./make_spectrum_list <arguments> 
---file <list_file.root>: specifies the list filename
---energy: use the energy calibration
---t_min <t0> --t_max <r1>: select time range [t0,t1]
 ```
+arguments:
+```--file <list_file.root>``` specifies the list filename
+
+```--energy``` use the energy calibration
+
+```--t_min <t0> --t_max <t1>``` select time range [t0,t1]
+
 ## Output
 * list_file.dat.root_(calibrated)_time_t0-t1.root
     * TH1D "hist": (calibrated) spectrum
@@ -157,10 +161,14 @@ Produces a rate vs. time plot from list file
 ./plot_rate <arguments> 
 ```
 arguments:
+
 ``` --file <list_file.root>``` specifies the list filename
+
 ```--energy``` use the energy calibration
-```--range_min <r0> --range_max <t1>``` select pulseheight/energy range [r0,r1]
-```--binwidth <binwidth>``` bin width (s)
+
+```--range_min <r0> --range_max <r1>``` select pulseheight/energy range [r0,r1]
+
+```--binwidth <binwidth>``` select bin width (s)
 
 ## Output
 * list_file.dat.root_rate_energy/pulseheight_r0-r1.root
