@@ -31,7 +31,7 @@ LIBS := `bat-config --libs`
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-        make_rootfile_list.cxx
+        plot_rate.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
@@ -39,12 +39,12 @@ CXXSRCS      = \
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
 MYPROGS     = \
-        make_rootfile_list
+        plot_rate
 
 GARBAGE = $(CXXOBJS) *~ link.d $(MYPROGS)
 
 # targets
-all : make_rootfile_list
+all : plot_rate
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -57,7 +57,7 @@ link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 clean :
 	rm -f $(GARBAGE)
 
-make_rootfile_list : $(CXXOBJS)
+plot_rate : $(CXXOBJS)
 	$(CXX) $(LDFLAGS) $(CXXOBJS) $(LIBS) -o $@
 
 print :

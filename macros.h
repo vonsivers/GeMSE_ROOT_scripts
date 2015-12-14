@@ -645,15 +645,15 @@ int spectrum_from_list(TString FileName, TString option="", double t_min=0., dou
     hdraw->Draw();
     
     TString timecut;
-    timecut = TString::Format("time_%1.0fs-%1.0fs",t_min,t_max);
+    timecut = TString::Format("%1.0f-%1.0fs",t_min,t_max);
     
     TString results_filename;
     
     if (option=="energy") {
-        results_filename = FileName+"_calibrated_"+timecut;
+        results_filename = FileName+"_spectrum_calibrated_"+timecut;
     }
     else {
-        results_filename = FileName+"_"+timecut;
+        results_filename = FileName+"_spectrum_"+timecut;
     }
     
     
@@ -764,11 +764,11 @@ int rate_from_list(TString FileName, double binwidth, double range_min, double r
     
     TString pulseheightcut;
     if (option=="energy") {
-        pulseheightcut = TString::Format("energy_%.1f-%.1f",range_min,range_max);
+        pulseheightcut = TString::Format("%.1f-%.1fkeV",range_min,range_max);
 
     }
     else {
-        pulseheightcut = TString::Format("pulseheight_%.0f-%.0f",range_min,range_max);
+        pulseheightcut = TString::Format("%.0f-%.0fCh",range_min,range_max);
     }
     c1->SaveAs(FileName+"_rate_"+pulseheightcut+".pdf");
     
