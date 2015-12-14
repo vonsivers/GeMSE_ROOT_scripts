@@ -141,6 +141,7 @@ Produces a spectrum from a list file
 ./make_spectrum_list <arguments> 
 ```
 arguments:
+
 ```--file <list_file.root>``` specifies the list filename
 
 ```--energy``` use the energy calibration
@@ -168,7 +169,7 @@ arguments:
 
 ```--range_min <r0> --range_max <r1>``` select pulseheight/energy range [r0,r1]
 
-```--binwidth <binwidth>``` select bin width (s)
+```--binwidth <binwidth>``` specify bin width (s)
 
 ## Output
 * list_file.dat.root_rate_energy/pulseheight_r0-r1.root
