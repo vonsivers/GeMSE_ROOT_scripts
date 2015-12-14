@@ -28,6 +28,7 @@ For every peak
 * constant : start parameter for constant
 * slope: start parameter for slope
 * energy (keV): literature value of peak energy
+
 ## Usage
 ```
 ./energy_calibration <parameters_calibration.txt>
@@ -73,7 +74,6 @@ For every gamma line
 * width bkg region (keV): width of region to sum up bkg counts
 * flag: 1 when the gamma line is directly simulated. 0 if full decay is simulated
 
-
 ## Usage 
 ```
 ./simulated_efficiency <parameters_simulated_efficiency.txt>
@@ -101,6 +101,7 @@ For every peak
 * sigma (keV): start parameter for peak standard deviation
 * constant : start parameter for constant
 * slope: start parameter for slope
+
 ## Usage
 ```
 ./energy_resolution <parameters_resolution.txt>
@@ -140,7 +141,7 @@ Produces a spectrum from a list file
 ./make_spectrum_list <arguments> 
 --file <list_file.root>: specifies the list filename
 --energy: use the energy calibration
---t_min <t0> --t_max <t1>: select time range [t0,t1]
+--t_min <t0> --t_max <r1>: select time range [t0,t1]
 ```
 ## Output
 * list_file.dat.root_(calibrated)_time_t0-t1.root
@@ -154,11 +155,13 @@ Produces a rate vs. time plot from list file
 ## Usage
 ```
 ./plot_rate <arguments> 
---file <list_file.root>: specifies the list filename
---energy: use the energy calibration
---range_min <r0> --range_max <t1>: select pulseheight/energy range [r0,r1]
---binwidth <binwidth>: bin width (s)
 ```
+arguments:
+``` --file <list_file.root>``` specifies the list filename
+```--energy``` use the energy calibration
+```--range_min <r0> --range_max <t1>``` select pulseheight/energy range [r0,r1]
+```--binwidth <binwidth>``` bin width (s)
+
 ## Output
 * list_file.dat.root_rate_energy/pulseheight_r0-r1.root
     * TH1D "hist": rate vs. time histogram
