@@ -15,7 +15,10 @@
 #include <fstream>
 #include <stdlib.h>     /* atof */
 
+
+// ----------------------------------------------------
 // erase comma from number
+// ----------------------------------------------------
 double getNumber(std::string a) {
     
     for(int i=0; i<=a.size(); i++) {  //Loop through the entire string
@@ -28,7 +31,9 @@ double getNumber(std::string a) {
 
 }
 
+// ----------------------------------------------------
 // make root file from ascii spectrum
+// ----------------------------------------------------
 int make_spectrum(TString FileName, TF1* calibration=0) {
     
     // open ascii file
@@ -122,7 +127,9 @@ int make_spectrum(TString FileName, TF1* calibration=0) {
     
 }
 
+// ----------------------------------------------------
 // get spectrum from root file
+// ----------------------------------------------------
 TH1D* getspectrum(TString FileName) {
     
     // check for root file
@@ -142,7 +149,9 @@ TH1D* getspectrum(TString FileName) {
     
 }
 
-// get spectrum from root file
+// ----------------------------------------------------
+// get calibration from root file
+// ----------------------------------------------------
 TF1* getcalibration(TString FileName) {
     
     // check for root file
@@ -163,7 +172,9 @@ TF1* getcalibration(TString FileName) {
     
 }
 
+// ----------------------------------------------------
 // fit peak only
+// ----------------------------------------------------
 TF1* FitGauss(TH1D* hist, double amp_st, double mean_st, double sigma_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
@@ -205,7 +216,9 @@ TF1* FitGauss(TH1D* hist, double amp_st, double mean_st, double sigma_st, double
     
 }
 
+// ----------------------------------------------------
 // fit peak + background
+// ----------------------------------------------------
 TF1* FitGaussPol1(TH1D* hist, double amp_st, double mean_st, double sigma_st, double const_st, double slope_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
@@ -251,7 +264,9 @@ TF1* FitGaussPol1(TH1D* hist, double amp_st, double mean_st, double sigma_st, do
 
 }
 
+// ----------------------------------------------------
 // fit 2 peaks + background
+// ----------------------------------------------------
 TF1* Fit2Peak(TH1D* hist, double amp1_st, double mean1_st, double sigma1_st, double amp2_st, double mean2_st, double sigma2_st, double const_st, double slope_st, double range_min, double range_max) {
     
     TObject* func = gROOT->FindObject("fitFunction");
@@ -302,7 +317,9 @@ TF1* Fit2Peak(TH1D* hist, double amp1_st, double mean1_st, double sigma1_st, dou
     
 }
 
+// ----------------------------------------------------
 // fit background only
+// ----------------------------------------------------
 TF1* FitPol1(TH1D* hist, double a_st, double b_st, double range_min, double range_max) {
     
     TF1* fitFunction = new TF1("fitFunction", "pol1");
@@ -329,7 +346,9 @@ TF1* FitPol1(TH1D* hist, double a_st, double b_st, double range_min, double rang
     return fitFunction;
 }
 
+// ----------------------------------------------------
 // fit energy calibration
+// ----------------------------------------------------
 TF1* FitPol2(TGraphErrors* graph, double a_st, double b_st, double c_st) {
 
     TF1* fitFunction = new TF1("fitFunction", "pol2");
@@ -353,8 +372,9 @@ TF1* FitPol2(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     return fitFunction;
 }
 
-
+// ----------------------------------------------------
 // fit resolution
+// ----------------------------------------------------
 TF1* FitSqrt(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     
     TF1* fitFunction = new TF1("fitFunction", "sqrt([0]+[1]*x+[2]*x*x)");
@@ -379,50 +399,70 @@ TF1* FitSqrt(TGraphErrors* graph, double a_st, double b_st, double c_st) {
 }
 
 
+// ----------------------------------------------------
 // make root file from list file
-void read_listfile(TString FileName) {
+// ----------------------------------------------------
+int read_listfile(TString FileName, TF1* calibration=0) {
     
+    // open list file
+    ifstream File;
     
-    // check for root file
+    File.open(FileName);
+    
+    if (!File.is_open()) {
+        std::cout << "##### ERROR: Could not open " << FileName << std::endl;
+        return 1;
+    }
+    
+    std::cout << "Reading list file ..." << std::endl;
+    
+    // create root file
     TFile* rootFile = new TFile(FileName+".root","recreate");
     
     TTree* dataTree = new TTree("dataTree","dataTree");
     TTree* headerTree =new TTree("headerTree","headerTree");
     
-    long long int time, time_raw;
-    int pulseheight;
-    long long int extras;
+    long long int time; // time stamp in 10ns unit
+    int pulseheight; // 15 bit pulseheight
+    long long int extras; // extra information about pileup, deadtime, fake event
+    double energy;
     std::string headerline;
-
+    
+    if (calibration) {
+        dataTree->Branch("energy",&energy);
+    }
+    
     dataTree->Branch("time",&time);
     dataTree->Branch("pulseheight",&pulseheight);
     dataTree->Branch("extras",&extras);
     
     headerTree->Branch("headerline",&headerline);
     
-    ifstream File;
-    
-    //ifstream myFile ("myfile.dat", ios::in | ios::binary);
-
-    
-    File.open(FileName);
-    
-    std::cout << "Reading list file ..." << std::endl;
-    
-    // start reading from file
+    // read header lines
     for (int i=0; i<5; ++i) {
         File >> headerline ;
         //std::cout << headerline << std::endl;
         headerTree->Fill();
     }
-
-    // read histogram
+    
+    // read data
     while (true) {
-        File >> time_raw >> pulseheight >> extras;
+        File >> time >> pulseheight >> extras;
+        
+        if (calibration) {
+            
+            // pileup event with valid energy (pulseheight < 0 and extras < 8)
+            if (pulseheight<0 && extras<8) {
+                energy = calibration->Eval(-pulseheight);
+            }
+            else {
+                energy = calibration->Eval(pulseheight);
+            }
+        }
         //std::cout << time_raw << "\t" << pulseheight << "\t" << extras << std::endl;
-        time = time_raw*10; // convert time to ns
-        dataTree->Fill();
         if( File.eof() ) break;
+        dataTree->Fill();
+        
     }
     
     File.close();
@@ -432,51 +472,169 @@ void read_listfile(TString FileName) {
     
     rootFile->Close();
     
+    return 0;
     
 }
 
-// make spectrum from list file
-TH1D* spectrum_from_list(TString FileName, TString option="") {
-    
+
+
+// ----------------------------------------------------
+// make spectrum from list file (FW version >= 128.64 and MC2 version >= 1.0.10)
+// ----------------------------------------------------
+
+int spectrum_from_list(TString FileName, TString option="", double t_min=0., double t_max=0.) {
     
     // check for root file
-    TFile* File = new TFile(FileName+".root");
+    TFile* File = TFile::Open(FileName);
     
-    // create root file from ASCII file if necessary
+    // check for file
     if (File->IsZombie()) {
         
-        File->Close();
+        std::cout << "##### ERROR: could not open " << FileName << std::endl;
         
-        std::cout << "creating new root file ..." << std::endl;
+        return 1;
         
-        read_listfile(FileName);
-        
-        TFile* File = TFile::Open(FileName+".root");
-
     }
     
     TTree* dataTree = (TTree*) File->Get("dataTree");
     
-    // get real time
     long long int time;
+    long long int extras;
+    int pulseheight;
+    double energy;
     
+    if (option=="energy") {
+        if(!(dataTree->GetListOfBranches()->FindObject("energy"))) {
+            std::cout << "##### ERROR: energy calibration is missing!" << std::endl;
+            return 1;
+        }
+        else {
+            dataTree->SetBranchAddress("energy",&energy);
+        }
+    }
+    
+    dataTree->SetBranchAddress("pulseheight",&pulseheight);
     dataTree->SetBranchAddress("time",&time);
+    dataTree->SetBranchAddress("extras",&extras);
+    
     int nEntries = dataTree->GetEntries();
     
     dataTree->GetEntry(0);
-    long long int t_start = time;
-
-    dataTree->GetEntry(nEntries-2);
-    long long int t_end = time;
-
-    double t_real = (double)(t_end-t_start)/(1.e9);
+    long long int t0 = time;
+    long long int llt_min;
+    long long int llt_max;
     
-    // get spectrum
-    TH1D* hist = new TH1D("hist",";ADC Channel;Counts",32768,0,32768);
+    // calculate real time (sec.)
+    if (t_max==0.) {
+        dataTree->GetEntry(nEntries-1);
+        t_max = (double) (time-t0)/1.e8;
+    }
+    double t_real = t_max-t_min;
+    llt_min = (long long int) t_min*1.e8+t0;
+    llt_max = (long long int) t_max*1.e8+t0;
     
-    dataTree->Draw("pulseheight>>hist","extras==0","goff");
+    
+    
+    // make spectrum
+    double pulseheight_energy;
+    
+    TH1D* hist = new TH1D();
+    hist->SetName("hist");
+
+    if (option=="energy") {
+        //TH1D* hist = new TH1D("hist",";Energy (keV);Counts",32768,0,dataTree->GetMaximum("energy"));
+        hist->SetBins(32768,0,dataTree->GetMaximum("energy"));
+        hist->GetXaxis()->SetTitle("Energy (keV)");
+        hist->GetYaxis()->SetTitle("Counts");
+    }
+    else {
+        //TH1D* hist = new TH1D("hist",";ADC Channel;Counts",32768,0,32768);
+        hist->SetBins(32768,0,32768);
+        hist->GetXaxis()->SetTitle("ADC Channel");
+        hist->GetYaxis()->SetTitle("Counts");
+
+    }
+    
+    // calculate dead time
+    long long int t_dead = 0;
+    long long int t_last = 0;
+    
+    int nPileup = 0;
+    int nAll = 0;
+    for (int i=0; i<nEntries; ++i) {
+        
+        dataTree->GetEntry(i);
+        
+        if (option=="energy") {
+            pulseheight_energy = energy;
+        }
+        else {
+            pulseheight_energy = pulseheight;
+        }
+        
+        if (time>=llt_min) {
+            if (time>llt_max) {
+                break;
+            }
+            // no fake event (extras < 8 or extras = 16)
+            if (extras<8 || extras == 16) {
+                nAll++;
+            }
+            
+            // pileup event where pulseheight is corrupted (pulseheight = 0 and extras < 8)
+            if (pulseheight==0 && extras<8) {
+                nPileup++;
+            }
+            
+            // pileup event with valid energy (pulseheight < 0 and extras < 8)
+            if (pulseheight<0 && extras<8) {
+                hist->Fill(pulseheight_energy);
+            }
+            
+            // regular event (pulseheight > 0 and extras < 8)
+            if (pulseheight>0 && extras<8) {
+                hist->Fill(pulseheight_energy);
+            }
+            
+            // oversaturated input (pulseheight = 32768 and extras = 16)
+            if (pulseheight==32768 && extras==16) {
+                hist->Fill(pulseheight_energy);
+            }
+            
+            // undersaturated input (pulseheight = 0 and extras = 16)
+            if (pulseheight==0 && extras==16) {
+                hist->Fill(pulseheight_energy);
+            }
+            
+            // deadtime before event (extras = odd number)
+            if (extras % 2) {
+                t_dead+=time-t_last;
+            }
+            
+        }
+        t_last=time;
+        
+    }
     hist->SetDirectory(0);
     File->Close();
+    
+    
+    // calculate fraction of pileup events
+    double f_pileup = (double) nPileup/nAll;
+    
+    // calculate live time (sec.)
+    //*t_live = (double) (*t_real*(1.-f_pileup)-t_dead/1.e8);
+    
+    // no pileup correction for low counting rates!
+    double t_live = (double) (t_real-t_dead/1.e8);
+
+    
+    TString s_time;
+    s_time = TString::Format("t_real: %1.3f s, t_live: %1.3f s",t_real,t_live);
+    std::cout << s_time << std::endl;
+    //cout << "fraction of pileup events: " << f_pileup << endl;
+    //cout << "deadtime from busy: " << (double) t_dead/1.e8 << endl;
+    
     
     // draw spectrum
     TCanvas* c1 = new TCanvas("c1");
@@ -484,59 +642,112 @@ TH1D* spectrum_from_list(TString FileName, TString option="") {
     c1->SetLogy();
     
     TH1D *hdraw = (TH1D*)hist->Clone("hdraw");
-    if (option=="scale") {
-        hdraw->Sumw2();
-        hdraw->Scale(1./t_real*86400,"width");
-        hdraw->GetYaxis()->SetTitle("Counts/bin/day");
-    }
     hdraw->Draw();
     
-    c1->SaveAs(FileName+"_spectrum.pdf");
+    TString timecut;
+    timecut = TString::Format("time_%1.0fs-%1.0fs",t_min,t_max);
     
-   
+    TString results_filename;
     
+    if (option=="energy") {
+        results_filename = FileName+"_calibrated_"+timecut;
+    }
+    else {
+        results_filename = FileName+"_"+timecut;
+    }
+    
+    
+    c1->SaveAs(results_filename+".pdf");
     
     // write to file
-    TFile* histFile = new TFile(FileName+"_spectrum.root","recreate");
+    TFile* histFile = new TFile(results_filename+".root","recreate");
     hist->Write();
     TVectorD v_real(1);
+    TVectorD v_live(1);
     v_real[0] = t_real;
+    v_live[0] = t_live;
     v_real.Write("t_real");
+    v_live.Write("t_live");
     histFile->Close();
     
-    return hist;
+    return 0;
 }
 
-// make time spectrum from list file
-TH1D* time_from_list(TString FileName, double binwidth) {
+
+
+// ----------------------------------------------------
+// make rate plot from list file
+// ----------------------------------------------------
+
+int rate_from_list(TString FileName, double binwidth, double range_min, double range_max, TString option="") {
     
     
     // check for root file
-    TFile* File = new TFile(FileName+".root");
+    TFile* File = new TFile(FileName);
     
-    // create root file from ASCII file if necessary
+    // check for file
     if (File->IsZombie()) {
         
-        File->Close();
+        std::cout << "##### ERROR: could not open " << FileName << std::endl;
         
-        std::cout << "creating new root file ..." << std::endl;
-        
-        read_listfile(FileName);
-        
-        TFile* File = TFile::Open(FileName+".root");
+        return 1;
         
     }
     
     TTree* dataTree = (TTree*) File->Get("dataTree");
     
-    double t_max = (double) dataTree->GetMaximum("time")/1.e9;
+    long long int time;
+    long long int extras;
+    int pulseheight;
+    
+    if (option=="energy") {
+        double energy;
+        if(!(dataTree->GetListOfBranches()->FindObject("energy"))) {
+            std::cout << "##### ERROR: energy calibration is missing!" << std::endl;
+            return 1;
+        }
+        else {
+            dataTree->SetBranchAddress("energy",&energy);
+        }
+    }
+    
+    dataTree->SetBranchAddress("pulseheight",&pulseheight);
+    dataTree->SetBranchAddress("time",&time);
+    dataTree->SetBranchAddress("extras",&extras);
+    
+    int nEntries = dataTree->GetEntries();
+    
+    
+    dataTree->GetEntry(0);
+    long long int t0 = time;
+    
+    dataTree->GetEntry(nEntries-1);
+    double t_max = (double) (time-t0)/1.e8;
     
     int nbins = t_max/binwidth;
-    TH1D* hist = new TH1D("hist","",nbins,0,t_max);
+    TH1D* hist = new TH1D("hist",";Time (s);Rate (Hz)",nbins,0,t_max);
     
-    dataTree->Draw("time/1.e9>>hist","","goff");
+    TString cut;
+    TString sdraw;
+    
+    if (option=="energy") {
+        // ignore fake events with extras >= 8 and select energy range
+        cut = TString::Format("extras<8 && energy > %.1f && energy < %.1f",range_min,range_max);
+    }
+    
+    else {
+        // ignore fake events with extras >= 8 and select pulseheight range (pileup events with pulseheight < 0 are ignored!)
+        cut = TString::Format("extras<8 && pulseheight > %.0f && pulseheight < %.0f",range_min,range_max);
+    }
+    
+    // convert time to sec.
+    sdraw = TString::Format("(time-%lli)/1.e8>>hist",t0);
+    
+    dataTree->Draw(sdraw,cut,"goff");
     hist->SetDirectory(0);
     File->Close();
+    
+    hist->Sumw2();
     
     // scale rate to Hz
     hist->Scale(1./binwidth);
@@ -545,23 +756,34 @@ TH1D* time_from_list(TString FileName, double binwidth) {
     TCanvas* c1 = new TCanvas("c1");
     gStyle->SetOptStat(0);
     
-    hist->GetXaxis()->SetTitle("Time (s)");
-    hist->GetYaxis()->SetTitle("Rate [Hz]");
+    hist->SetTitle(cut);
     
-    hist->Sumw2();
+    hist->GetYaxis()->SetTitleOffset(1.2);
     
     hist->Draw();
     
-    c1->SaveAs(FileName+"_rate_vs_time.pdf");
+    TString pulseheightcut;
+    if (option=="energy") {
+        pulseheightcut = TString::Format("energy_%.1f-%.1f",range_min,range_max);
+
+    }
+    else {
+        pulseheightcut = TString::Format("pulseheight_%.0f-%.0f",range_min,range_max);
+    }
+    c1->SaveAs(FileName+"_rate_"+pulseheightcut+".pdf");
     
     
     // write to file
-    TFile* histFile = new TFile(FileName+"_rate_vs_time.root","recreate");
+    TFile* histFile = new TFile(FileName+"_rate_"+pulseheightcut+".root","recreate");
     hist->Write();
     histFile->Close();
     
-    return hist;
+    return 0;
 }
+
+
+
+
 
 
 
