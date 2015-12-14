@@ -3,7 +3,7 @@ make_rootfile
 Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI file must be real time, second line live time
 ## Usage
 ```
-./make_rootfile <spectrum_file.txt>
+./make_rootfile_spectrum <spectrum_file.txt>
 ```
 ## Output
 * spectrum_file.txt.root 
@@ -115,6 +115,53 @@ For every peak
         * TGraphErrors "Graph": resolution vs energy 
         * TF1 "fitFunction": fit to "Graph" with sqrt(p0+p1*x+p2*x^2)
 
+
+make_rootfile_list
+======
+Converts a list file of CAEN DT5781A into a ROOT file
+## Usage
+```
+./make_rootfile_list <list_file.dat> <calibration_function.root>
+```
+the second argument is optional
+## Output
+* list_file.dat.root
+    * TTree "dataTree"
+        * TBranch "energy": energy in keV (only if calibration function was specified)
+        * TBranch "pulseheight": pulseheight in ADC channels
+        * TBranch "extras": extra information about pileup, deadtime or saturation
+        * TBranch "time": timestamp in 10ns units
+
+make_spectrum_list
+======
+Produces a spectrum from a list file  
+## Usage
+```
+./make_spectrum_list <arguments> 
+--file <list_file.root>: specifies the list filename
+--energy: use the energy calibration
+--t_min <t0> --t_max <t1>: select time range [t0,t1]
+```
+## Output
+* list_file.dat.root_(calibrated)_time_t0-t1.root
+    * TH1D "hist": (calibrated) spectrum
+    * TVectorD "t_live": live time 
+    * TVectorD "t_real": real time
+
+plot_rate
+======
+Produces a rate vs. time plot from list file
+## Usage
+```
+./plot_rate <arguments> 
+--file <list_file.root>: specifies the list filename
+--energy: use the energy calibration
+--range_min <r0> --range_max <t1>: select pulseheight/energy range [r0,r1]
+--binwidth <binwidth>: bin width (s)
+```
+## Output
+* list_file.dat.root_rate_energy/pulseheight_r0-r1.root
+    * TH1D "hist": rate vs. time histogram
 
 
 macros.h

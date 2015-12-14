@@ -31,7 +31,7 @@ LIBS := `bat-config --libs`
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-        simulated_efficiency.cxx
+        make_rootfile_list.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
@@ -39,12 +39,12 @@ CXXSRCS      = \
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
 MYPROGS     = \
-        simulated_efficiency
+        make_rootfile_list
 
 GARBAGE = $(CXXOBJS) *~ link.d $(MYPROGS)
 
 # targets
-all : simulated_efficiency
+all : make_rootfile_list
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -57,7 +57,7 @@ link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 clean :
 	rm -f $(GARBAGE)
 
-simulated_efficiency : $(CXXOBJS)
+make_rootfile_list : $(CXXOBJS)
 	$(CXX) $(LDFLAGS) $(CXXOBJS) $(LIBS) -o $@
 
 print :
