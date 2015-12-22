@@ -175,6 +175,19 @@ arguments:
 * list_file.dat.root_rate_energy/pulseheight_r0-r1.root
     * TH1D "hist": rate vs. time histogram
 
+add_spectra
+======
+Adds up two or more spectra 
+## Usage
+```
+./add_spectra <spectrum1.root> <spectrum2.root> ... <results_filename> 
+```
+
+## Output
+* results_filename.root
+    * TH1D "hist": sum of spectrum1, spectrum2, ...
+    * TVectorD "t_live": summed up live time 
+    * TVectorD "t_real": summed up real time
 
 macros.h
 ======

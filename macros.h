@@ -10,6 +10,7 @@
 #include <TVectorD.h>
 #include <TPaveStats.h>
 #include <TMinuit.h>
+#include <TVectorD.h>
 
 #include <iostream>
 #include <fstream>
@@ -149,8 +150,108 @@ TH1D* getspectrum(TString FileName) {
     
 }
 
+
 // ----------------------------------------------------
-// get calibration from root file
+// get real time from root file
+// ----------------------------------------------------
+double getreal(TString FileName) {
+    
+    // check for root file
+    TFile* File = TFile::Open(FileName);
+    
+    if (!File) {
+        
+        std::cout << "###### ERROR: could not open " << FileName << std::endl;
+        return 0;
+    }
+    
+    TVectorD* v_real = (TVectorD*) File->Get("t_real");
+    double t_real = ((*v_real)[0]);
+    
+    File->Close();
+    
+    return t_real;
+    
+}
+
+// ----------------------------------------------------
+// get live time from root file
+// ----------------------------------------------------
+double getlive(TString FileName) {
+    
+    // check for root file
+    TFile* File = TFile::Open(FileName);
+    
+    if (!File) {
+        
+        std::cout << "###### ERROR: could not open " << FileName << std::endl;
+        return 0;
+    }
+    
+    TVectorD* v_live = (TVectorD*) File->Get("t_live");
+    double t_live = ((*v_live)[0]);
+    
+    File->Close();
+    
+    return t_live;
+    
+}
+
+
+// ----------------------------------------------------
+// add up spectra and measurement times
+// ----------------------------------------------------
+int addspectra(std::vector<TString> FileNames, TString results_filename) {
+    
+    std::cout << "opening spectrum " << FileNames[0] << " ..." << std::endl;
+
+    TH1D* hist = getspectrum(FileNames[0]);
+    double t_real=getreal(FileNames[0]);
+    double t_live=getlive(FileNames[0]);
+    
+    int Nfiles = FileNames.size();
+    
+    for (int i=1; i<Nfiles; ++i) {
+        
+        if(getspectrum(FileNames[i])==0) {return 1;}
+        else {
+            std::cout << "adding spectrum " << FileNames[i] << " ..." << std::endl;
+            hist->Add(getspectrum(FileNames[i]));
+            t_live+=getlive(FileNames[i]);
+            t_real+=getreal(FileNames[i]);
+        }
+    }
+    
+    
+    // draw spectrum
+    TCanvas* c1 = new TCanvas("c1");
+    gStyle->SetOptStat(0);
+    c1->SetLogy();
+    
+    hist->Draw();
+    
+    c1->SaveAs(results_filename+".pdf");
+    
+    // write to file
+    TFile* histFile = new TFile(results_filename+".root","recreate");
+    hist->Write();
+    TVectorD v_real(1);
+    TVectorD v_live(1);
+    v_real[0] = t_real;
+    v_live[0] = t_live;
+    v_real.Write("t_real");
+    v_live.Write("t_live");
+    histFile->Close();
+    
+    return 0;
+
+    
+}
+
+
+
+// ----------------------------------------------------
+// get calibration function from root file
 // ----------------------------------------------------
 TF1* getcalibration(TString FileName) {
     
