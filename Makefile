@@ -31,7 +31,8 @@ LIBS := `bat-config --libs`
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS_all      = \
-	calibrate_spectrum.cxx energy_calibration.cxx energy_resolution.cxx make_rootfile_list.cxx make_rootfile_spectrum.cxx make_spectrum_list.cxx plot_rate.cxx simulated_efficiency.cxx
+	calibrate_spectrum.cxx energy_calibration.cxx energy_resolution.cxx make_rootfile_list.cxx make_rootfile_spectrum.cxx make_spectrum_list.cxx plot_rate.cxx simulated_efficiency.cxx add_spectra.cxx
+
 CXXSRCS1      = \
         calibrate_spectrum.cxx 
 CXXSRCS2      = \
@@ -48,6 +49,8 @@ CXXSRCS7      = \
 	plot_rate.cxx
 CXXSRCS8      = \
 	simulated_efficiency.cxx
+CXXSRCS9      = \
+	add_spectra.cxx
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
 #
@@ -61,6 +64,7 @@ CXXOBJS5      = $(patsubst %.cxx,%.o,$(CXXSRCS5))
 CXXOBJS6      = $(patsubst %.cxx,%.o,$(CXXSRCS6))
 CXXOBJS7      = $(patsubst %.cxx,%.o,$(CXXSRCS7))
 CXXOBJS8      = $(patsubst %.cxx,%.o,$(CXXSRCS8))
+CXXOBJS9      = $(patsubst %.cxx,%.o,$(CXXSRCS9))
 
 MYPROGS_all     = \
 	calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency
@@ -81,11 +85,13 @@ MYPROGS7     = \
 	plot_rate
 MYPROGS8     = \
 	simulated_efficiency
+MYPROGS9     = \
+	add_spectra
 
 GARBAGE = $(CXXOBJS_all) *~ link.d $(MYPROGS_all)
 
 # targets
-all : calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency
+all : calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS_all))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS_all) > link.d;
@@ -121,6 +127,9 @@ plot_rate : $(CXXOBJS7)
 
 simulated_efficiency : $(CXXOBJS8)
 	$(CXX) $(LDFLAGS) $(CXXOBJS8) $(LIBS) -o $@
+
+add_spectra : $(CXXOBJS9)
+	$(CXX) $(LDFLAGS) $(CXXOBJS9) $(LIBS) -o $@
 
 
 print :
