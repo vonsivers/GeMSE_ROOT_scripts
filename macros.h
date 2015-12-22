@@ -525,12 +525,23 @@ int read_listfile(TString FileName, TF1* calibration=0) {
     
     long long int time; // time stamp in 10ns unit
     int pulseheight; // 15 bit pulseheight
-    long long int extras; // extra information about pileup, deadtime, fake event
+    long long int extras; // extra information about saturation, pileup, deadtime, timestamp rollover
     double energy;
     std::string headerline;
     
     if (calibration) {
         dataTree->Branch("energy",&energy);
+        
+        // also save the xbins to a Tree
+        // after calibration histo has variable bin size
+        std::vector<double> xbins;
+        for (int i=0; i<32768; ++i) {
+            xbins.push_back(calibration->Eval(i+0.5));
+        }
+        TTree* binTree = new TTree("binTree","binTree");
+        binTree->Branch("xbins",&xbins);
+        binTree->Fill();
+        binTree->Write();
     }
     
     dataTree->Branch("time",&time);
@@ -548,6 +559,9 @@ int read_listfile(TString FileName, TF1* calibration=0) {
     
     // read data
     while (true) {
+        
+        if( File.eof() ) break;
+        
         File >> time >> pulseheight >> extras;
         
         if (calibration) {
@@ -561,7 +575,6 @@ int read_listfile(TString FileName, TF1* calibration=0) {
             }
         }
         //std::cout << time_raw << "\t" << pulseheight << "\t" << extras << std::endl;
-        if( File.eof() ) break;
         dataTree->Fill();
         
     }
@@ -604,14 +617,38 @@ int spectrum_from_list(TString FileName, TString option="", double t_min=0., dou
     int pulseheight;
     double energy;
     
+    
+    // make spectrum
+    TH1D* hist = new TH1D();
+    hist->SetName("hist");
+    
     if (option=="energy") {
         if(!(dataTree->GetListOfBranches()->FindObject("energy"))) {
             std::cout << "##### ERROR: energy calibration is missing!" << std::endl;
             return 1;
         }
+        else if (!(File->Get("binTree"))) {
+            std::cout << "##### ERROR: binning information is missing!" << std::endl;
+            return 1;
+        }
         else {
             dataTree->SetBranchAddress("energy",&energy);
+            
+            TTree* binTree = (TTree*) File->Get("binTree");
+            std::vector<double>* xbins = new std::vector<double>;
+            binTree->SetBranchAddress("xbins",&xbins);
+            binTree->GetEntry(0);
+            hist->SetBins(xbins->size()-1,&xbins->at(0));
+            hist->GetXaxis()->SetTitle("Energy (keV)");
+            hist->GetYaxis()->SetTitle("Counts");
+
         }
+    }
+    
+    else {
+        hist->SetBins(32767,0.5,32767.5);
+        hist->GetXaxis()->SetTitle("ADC Channel");
+        hist->GetYaxis()->SetTitle("Counts");
     }
     
     dataTree->SetBranchAddress("pulseheight",&pulseheight);
@@ -635,33 +672,16 @@ int spectrum_from_list(TString FileName, TString option="", double t_min=0., dou
     llt_max = (long long int) t_max*1.e8+t0;
     
     
-    
-    // make spectrum
-    double pulseheight_energy;
-    
-    TH1D* hist = new TH1D();
-    hist->SetName("hist");
-
-    if (option=="energy") {
-        //TH1D* hist = new TH1D("hist",";Energy (keV);Counts",32768,0,dataTree->GetMaximum("energy"));
-        hist->SetBins(32768,0,dataTree->GetMaximum("energy"));
-        hist->GetXaxis()->SetTitle("Energy (keV)");
-        hist->GetYaxis()->SetTitle("Counts");
-    }
-    else {
-        //TH1D* hist = new TH1D("hist",";ADC Channel;Counts",32768,0,32768);
-        hist->SetBins(32768,0,32768);
-        hist->GetXaxis()->SetTitle("ADC Channel");
-        hist->GetYaxis()->SetTitle("Counts");
-
-    }
-    
     // calculate dead time
     long long int t_dead = 0;
     long long int t_last = 0;
     
     int nPileup = 0;
     int nAll = 0;
+    
+    double pulseheight_energy;
+    
+    // loop over all entries
     for (int i=0; i<nEntries; ++i) {
         
         dataTree->GetEntry(i);
@@ -687,30 +707,34 @@ int spectrum_from_list(TString FileName, TString option="", double t_min=0., dou
                 nPileup++;
             }
             
-            // pileup event with valid energy (pulseheight < 0 and extras < 8)
-            if (pulseheight<0 && extras<8) {
-                hist->Fill(pulseheight_energy);
-            }
-            
-            // regular event (pulseheight > 0 and extras < 8)
-            if (pulseheight>0 && extras<8) {
-                hist->Fill(pulseheight_energy);
-            }
-            
-            // oversaturated input (pulseheight = 32768 and extras = 16)
-            if (pulseheight==32768 && extras==16) {
-                hist->Fill(pulseheight_energy);
-            }
-            
-            // undersaturated input (pulseheight = 0 and extras = 16)
-            if (pulseheight==0 && extras==16) {
-                hist->Fill(pulseheight_energy);
-            }
-            
             // deadtime before event (extras = odd number)
             if (extras % 2) {
                 t_dead+=time-t_last;
             }
+            
+            /*
+            // pileup event with valid energy (pulseheight < 0 and extras < 8)
+            if (pulseheight<0 && extras<8) {
+            }
+            
+            // regular event (pulseheight > 0 and extras < 8)
+            if (pulseheight>0 && extras<8) {
+            }
+            
+            // oversaturated trapezoid (pulseheight = 32767 and extras = 0)
+            if (pulseheight==32767 && extras==0) {
+            }
+            
+            // oversaturated input (pulseheight = 32767 and extras = 16)
+            if (pulseheight==32767 && extras==16) {
+            }
+            
+            // undersaturated input (pulseheight = 0 and extras = 16)
+            if (pulseheight==0 && extras==16) {
+            }
+            */
+            
+            hist->Fill(pulseheight_energy);
             
         }
         t_last=time;
