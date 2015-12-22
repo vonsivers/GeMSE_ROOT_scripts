@@ -1,6 +1,6 @@
 make_rootfile_spectrum
 ======
-Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI file must be real time, second line live time
+Converts an ASCII spectrum of CAEN DT5781A to a ROOT file. First line in ASCII file must be real time, second line live time
 ## Usage
 ```
 ./make_rootfile_spectrum <spectrum_file.txt>
@@ -14,7 +14,7 @@ Converts an ASCI spectrum of CAEN DT5781A to a ROOT file. First line in ASCI fil
 
 energy_calibration
 ======
-Fits the peaks in a spectrum with a Gauss+Pol1. The peak position is then fitted with a Pol2 to get the energy calibration. 
+Fits the peaks in a spectrum with a Gauss+Pol1. The peak position vs. energy is then fitted with a Pol2 to get the energy calibration. 
 
 Requires a **parameters txt file** (see „example_parameters_calibration.txt“) with the following content:
 * spectrum file name: name of spectrum **ROOT** file
@@ -88,7 +88,7 @@ For every gamma line
 
 energy_resolution
 ======
-Fits the peaks in a **calibrated** spectrum with Gauss+Pol1. The peaks' standard deviation is then fitted with a function sqrt(p0+p1*x+p2*x^2) to get the energy resolution as function of energy.
+Fits the peaks in a **calibrated** spectrum with Gauss+Pol1. The peaks' standard deviation vs energy is then fitted with a function sqrt(p0+p1*x+p2*x^2) to get the energy resolution as function of energy.
 
 Requires a **parameters txt file** (see „example_parameters_resolution.txt“) with the following content:
 * spectrum file name: name of spectrum **ROOT** file
@@ -119,7 +119,7 @@ For every peak
 
 make_rootfile_list
 ======
-Converts a list file of CAEN DT5781A into a ROOT file
+Converts a list file (ASCII format) of CAEN DT5781A into a ROOT file
 ## Usage
 ```
 ./make_rootfile_list <list_file.dat> <calibration_function.root>
