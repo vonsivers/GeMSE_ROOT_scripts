@@ -68,17 +68,17 @@ int make_spectrum(TString FileName, TF1* calibration=0) {
         
         // apply energy calibration
         if (calibration!=0) {
-            channel[i]=calibration->Eval(i);
+            channel[i]=calibration->Eval(i+0.5);
         }
         else {
-            channel[i]=i;
+            channel[i]=i+0.5;
         }
     }
     if (calibration!=0) {
-        channel[Nchannels]=calibration->Eval(Nchannels);
+        channel[Nchannels]=calibration->Eval(Nchannels+0.5);
     }
     else {
-        channel[Nchannels]=Nchannels;
+        channel[Nchannels]=Nchannels+0.5;
     }
 
     
