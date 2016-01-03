@@ -189,6 +189,17 @@ Adds up two or more spectra
     * TVectorD "t_live": summed up live time 
     * TVectorD "t_real": summed up real time
 
+integral_rate
+======
+Calculates the integral rate in a certain energy range 
+## Usage
+```
+./integral_rate <spectrum.root> <E_min> <E_max> 
+```
+
+## Output
+* spectrum_integral_rate_E_min-E_max.pdf
+
 macros.h
 ======
 contains all macros which are used by the other scripts
