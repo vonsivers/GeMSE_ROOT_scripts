@@ -11,6 +11,7 @@
 #include <TPaveStats.h>
 #include <TMinuit.h>
 #include <TVectorD.h>
+#include <TLatex.h>
 
 #include <iostream>
 #include <fstream>
@@ -248,6 +249,47 @@ int addspectra(std::vector<TString> FileNames, TString results_filename) {
     
 }
 
+// ----------------------------------------------------
+// calculate integral rate
+// ----------------------------------------------------
+
+int integralrate(TString filename, double E_min, double E_max) {
+    
+    TH1D* hist = getspectrum(filename);
+    double t_live = getlive(filename);
+    
+    if(hist==0||t_live==0) {
+        return 0;
+    }
+    
+    
+    double counts = hist->Integral(hist->FindBin(E_min),hist->FindBin(E_max));
+    double rate = counts/t_live*3600.*24.;
+    double rate_err =  sqrt(counts)/t_live*3600.*24.;
+    
+    std::cout << "integral rate: " << rate << " +- " << rate_err << " cts/day" << std::endl;
+    
+    // draw histogram
+    TCanvas* c1 = new TCanvas("c1");
+    gStyle->SetOptStat(0);
+    c1->SetLogy();
+    hist->Draw();
+    
+    TString textToPlot;
+    textToPlot = TString::Format("#scale[0.7]{#splitline{integral rate (%1.0f - %1.0f keV):}{%1.1f #pm %1.1f cts/day}}",E_min,E_max,rate,rate_err);
+    
+    TLatex* t = new TLatex(0.55,0.8,textToPlot);
+    t->SetNDC();
+    
+    t->Draw();
+    
+    TString resultsname;
+    resultsname = TString::Format(filename+"_integral_rate_%1.0f-%1.0fkeV.pdf",E_min,E_max);
+    
+    c1->SaveAs(resultsname);
+    
+    return 1;
+}
 
 
 // ----------------------------------------------------
