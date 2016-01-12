@@ -522,6 +522,8 @@ TF1* FitSqrt(TGraphErrors* graph, double a_st, double b_st, double c_st) {
     
     TF1* fitFunction = new TF1("fitFunction", "sqrt([0]+[1]*x+[2]*x*x)");
     
+    //TF1* fitFunction = new TF1("fitFunction", "sqrt([0]+[1]*x)");
+
     fitFunction->SetParameter(0,a_st);
     fitFunction->SetParameter(1,b_st);
     fitFunction->SetParameter(2,c_st);

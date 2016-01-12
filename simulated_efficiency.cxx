@@ -49,6 +49,9 @@ int read_parameters(TString FileName) {
     while (true)
     {
         File >> IsotopeName >> energy >> BR_G4 >> BR_NuDat >> width_sig >> width_bck >> flag;
+        
+        if( File.eof() || IsotopeName=="") break;
+
         fIsotopeName.push_back(IsotopeName);
         fEnergy.push_back(energy);
         fBR_G4.push_back(BR_G4);
@@ -57,7 +60,6 @@ int read_parameters(TString FileName) {
         fWidth_bck.push_back(width_bck);
         fFlag.push_back(flag);
 
-        if( File.eof() ) break;
         
     }
     
