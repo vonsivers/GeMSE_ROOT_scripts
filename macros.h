@@ -143,6 +143,12 @@ TH1D* getspectrum(TString FileName) {
         return 0;
     }
     
+    if (!File->GetListOfKeys()->Contains("hist")) {
+        std::cout << "###### ERROR: no histogram in file " << FileName << std::endl;
+        return 0;
+    }
+
+    
     TH1D* hist = (TH1D*) File->Get("hist");
     hist->SetDirectory(0);
     File->Close();
@@ -166,6 +172,12 @@ double getreal(TString FileName) {
         return 0;
     }
     
+    if (!File->GetListOfKeys()->Contains("t_real")) {
+        std::cout << "###### ERROR: no real time in file " << FileName << std::endl;
+        return 0;
+    }
+
+    
     TVectorD* v_real = (TVectorD*) File->Get("t_real");
     double t_real = ((*v_real)[0]);
     
@@ -186,6 +198,11 @@ double getlive(TString FileName) {
     if (!File) {
         
         std::cout << "###### ERROR: could not open " << FileName << std::endl;
+        return 0;
+    }
+    
+    if (!File->GetListOfKeys()->Contains("t_live")) {
+        std::cout << "###### ERROR: no live time in file " << FileName << std::endl;
         return 0;
     }
     
