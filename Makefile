@@ -31,7 +31,7 @@ LIBS := `bat-config --libs`
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS_all      = \
-	calibrate_spectrum.cxx energy_calibration.cxx energy_resolution.cxx make_rootfile_list.cxx make_rootfile_spectrum.cxx make_spectrum_list.cxx plot_rate.cxx simulated_efficiency.cxx add_spectra.cxx integral_rate.cxx
+	calibrate_spectrum.cxx energy_calibration.cxx energy_resolution.cxx make_rootfile_list.cxx make_rootfile_spectrum.cxx make_spectrum_list.cxx plot_rate.cxx simulated_efficiency.cxx add_spectra.cxx integral_rate.cxx merge_simulated_efficiencies.cxx
 
 CXXSRCS1      = \
         calibrate_spectrum.cxx 
@@ -53,6 +53,8 @@ CXXSRCS9      = \
 	add_spectra.cxx
 CXXSRCS10      = \
 	integral_rate.cxx
+CXXSRCS11      = \
+	merge_simulated_efficiencies.cxx
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
 #
@@ -68,6 +70,7 @@ CXXOBJS7      = $(patsubst %.cxx,%.o,$(CXXSRCS7))
 CXXOBJS8      = $(patsubst %.cxx,%.o,$(CXXSRCS8))
 CXXOBJS9      = $(patsubst %.cxx,%.o,$(CXXSRCS9))
 CXXOBJS10      = $(patsubst %.cxx,%.o,$(CXXSRCS10))
+CXXOBJS11      = $(patsubst %.cxx,%.o,$(CXXSRCS11))
 
 MYPROGS_all     = \
 	calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra integral_rate
@@ -90,13 +93,15 @@ MYPROGS8     = \
 	simulated_efficiency
 MYPROGS9     = \
 	add_spectra
-MYPROGS9     = \
+MYPROGS10     = \
 	integral_rate
+MYPROGS11     = \
+	merge_simulated_efficiencies
 
 GARBAGE = $(CXXOBJS_all) *~ link.d $(MYPROGS_all)
 
 # targets
-all : calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra integral_rate
+all : calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra integral_rate merge_simulated_efficiencies
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS_all))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS_all) > link.d;
@@ -139,6 +144,8 @@ add_spectra : $(CXXOBJS9)
 integral_rate : $(CXXOBJS10)
 	$(CXX) $(LDFLAGS) $(CXXOBJS10) $(LIBS) -o $@
 
+merge_simulated_efficiencies : $(CXXOBJS11)
+	$(CXX) $(LDFLAGS) $(CXXOBJS10) $(LIBS) -o $@
 print :
 	@echo compiler  : $(CXX)
 	@echo c++ srcs  : $(CXXSRCS_all)
