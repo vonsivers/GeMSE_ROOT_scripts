@@ -73,7 +73,7 @@ CXXOBJS10      = $(patsubst %.cxx,%.o,$(CXXSRCS10))
 CXXOBJS11      = $(patsubst %.cxx,%.o,$(CXXSRCS11))
 
 MYPROGS_all     = \
-	calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra integral_rate
+	calibrate_spectrum energy_calibration energy_resolution make_rootfile_list make_rootfile_spectrum make_spectrum_list plot_rate simulated_efficiency add_spectra integral_rate merge_simulated_efficiencies
 
 MYPROGS1     = \
         calibrate_spectrum
@@ -145,7 +145,7 @@ integral_rate : $(CXXOBJS10)
 	$(CXX) $(LDFLAGS) $(CXXOBJS10) $(LIBS) -o $@
 
 merge_simulated_efficiencies : $(CXXOBJS11)
-	$(CXX) $(LDFLAGS) $(CXXOBJS10) $(LIBS) -o $@
+	$(CXX) $(LDFLAGS) $(CXXOBJS11) $(LIBS) -o $@
 print :
 	@echo compiler  : $(CXX)
 	@echo c++ srcs  : $(CXXSRCS_all)
