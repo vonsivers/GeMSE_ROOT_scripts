@@ -200,6 +200,18 @@ Calculates the integral rate in a certain energy range
 ## Output
 * spectrum_integral_rate_E_min-E_max.pdf
 
+merge_simulated_efficiencies
+======
+merges the results of several simulated efficiencies into a single file 
+## Usage
+```
+./merge_simulated_efficiencies <simulated_efficiencies1.root> <simulated_efficiencies2.root> ... <simulated_efficiencies_merged> 
+```
+
+## Output
+* simulated_efficiencies_merged.pdf
+* simulated_efficiencies_merged.root
+
 macros.h
 ======
 contains all macros which are used by the other scripts
